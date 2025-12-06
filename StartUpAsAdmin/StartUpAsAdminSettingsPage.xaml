@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:StartUpAsAdmin"
       xmlns:ci="http://classisland.tech/schemas/xaml/core"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:viewModels="clr-namespace:StartUpAsAdmin.ViewModels"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -21,61 +22,269 @@
     <ci:SettingsPageBase.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <ci:BooleanToVisibilityReConverter x:Key="BooleanToVisibilityReConverter" />
-
-    </ci:SettingsPageBase.Resources>
-    <StackPanel MaxWidth="750" Margin="6">
-        <materialDesign:ColorZone Background="#22FF0000"
-                                  Margin="0 0 0 6"
-                                  Visibility="{Binding ViewModel.IsRunningAsAdmin, Converter={StaticResource BooleanToVisibilityReConverter}}">
-            <Grid TextElement.FontSize="14">
-                <DockPanel Margin="8 4 4 4">
-                    <materialDesign:PackIcon Kind="Administrator"
-                                             Margin="0 0 4 0"
-                                             VerticalAlignment="Center"/>
-                    <TextBlock Text="你需要以管理员身份运行 ClassIsland 才能更改此处的设置。"
-                               TextWrapping="Wrap"
-                               VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource MaterialDesignFlatButton}"
-                            Foreground="{DynamicResource MaterialDesignBody}"
-                            Margin="0 -4"
-                            Padding="8 0"
-                            materialDesign:RippleAssist.Feedback="{DynamicResource MaterialDesignBody}"
-                            HorizontalAlignment="Right"
-                            Click="ButtonRestartAsAdmin_OnClick">
-                        <ci:IconText Kind="Restart" Text="以管理员身份重启"/>
-                    </Button>
-                </DockPanel>
-            </Grid>
-        </materialDesign:ColorZone>
-
-        <!-- 以管理员身份自启动 -->
-        <materialDesign:Card Margin="0 0 0 6"
-                             IsEnabled="{Binding ViewModel.IsRunningAsAdmin}">
-            <Expander Background="Transparent"
-                      IsExpanded="True"
-                      TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
-                <Expander.Header>
-                    <ci:SettingsControl IconGlyph="Administrator"
-                                              Foreground="{DynamicResource MaterialDesignBody}"
-                                              Header="以管理员身份自启动"
-                                              Description="ClassIsland 将创建一个计划任务以实现以管理员身份自启动，并禁用应用内置的自启动方式。"
-                                              HasSwitcher="False"
-                                              Margin="-12 0" />
-                </Expander.Header>
-                <StackPanel Margin="36 0 48 12">
-                    <WrapPanel>
-                        <Button Click="ButtonCreateTask_OnClick" Style="{StaticResource MaterialDesignFlatButton}">
-                            <ci:IconText Kind="Add" Text="创建/更新计划任务" />
-                        </Button>
-                        <Button Click="ButtonRemoveTask_OnClick" Style="{StaticResource MaterialDesignFlatButton}"
-                                Margin="4 0 0 0">
-                            <ci:IconText Kind="Remove" Text="删除计划任务" />
-                        </Button>
-                    </WrapPanel>
-                </StackPanel>
-            </Expander>
-        </materialDesign:Card>
-
         
-    </StackPanel>
+        <!-- 枚举转换器 -->
+        <local:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <local:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+        
+        <!-- 设计时ViewModel -->
+        <viewModels:StartUpAsAdminSettingsViewModel x:Key="DesignViewModel" />
+    </ci:SettingsPageBase.Resources>
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="750" Margin="6">
+            <!-- 管理员提示 -->
+            <materialDesign:ColorZone Background="#22FF0000"
+                                      Margin="0 0 0 6"
+                                      Visibility="{Binding ViewModel.IsRunningAsAdmin, Converter={StaticResource BooleanToVisibilityReConverter}}">
+                <Grid TextElement.FontSize="14">
+                    <DockPanel Margin="8 4 4 4">
+                        <materialDesign:PackIcon Kind="Administrator"
+                                                 Margin="0 0 4 0"
+                                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="你需要以管理员身份运行 ClassIsland 才能更改此处的设置。"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"/>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Foreground="{DynamicResource MaterialDesignBody}"
+                                Margin="0 -4"
+                                Padding="8 0"
+                                materialDesign:RippleAssist.Feedback="{DynamicResource MaterialDesignBody}"
+                                HorizontalAlignment="Right"
+                                Click="ButtonRestartAsAdmin_OnClick">
+                            <ci:IconText Kind="Restart" Text="以管理员身份重启"/>
+                        </Button>
+                    </DockPanel>
+                </Grid>
+            </materialDesign:ColorZone>
+
+            <!-- 启动模式选择 -->
+            <materialDesign:Card Margin="0 0 0 6"
+                                 IsEnabled="{Binding ViewModel.IsRunningAsAdmin}">
+                <Expander Background="Transparent"
+                          IsExpanded="True"
+                          TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                    <Expander.Header>
+                        <ci:SettingsControl IconGlyph="Start"
+                                            Foreground="{DynamicResource MaterialDesignBody}"
+                                            Header="启动模式"
+                                            Description="选择 ClassIsland 的启动方式"
+                                            HasSwitcher="False"
+                                            Margin="-12 0" />
+                    </Expander.Header>
+                    
+                    <StackPanel Margin="36 0 48 12">
+                        <!-- 普通启动 -->
+                        <RadioButton GroupName="StartupMode"
+                                     IsChecked="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Normal}"
+                                     Margin="0 8 0 4">
+                            <StackPanel>
+                                <TextBlock Text="普通启动" 
+                                           FontWeight="SemiBold"
+                                           FontSize="16"/>
+                                <TextBlock Text="以当前用户权限启动 ClassIsland" 
+                                           Opacity="0.7" 
+                                           TextWrapping="Wrap"
+                                           Margin="0 4 0 0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        
+                        <Rectangle Height="1" 
+                                   Fill="{DynamicResource MaterialDesignDivider}" 
+                                   Margin="0 8" 
+                                   Opacity="0.5"/>
+                        
+                        <!-- 以管理员身份启动（计划任务） -->
+                        <RadioButton GroupName="StartupMode"
+                                     IsChecked="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=AdminTask}"
+                                     Margin="0 4 0 8">
+                            <StackPanel>
+                                <TextBlock Text="以管理员身份启动（计划任务）" 
+                                           FontWeight="SemiBold"
+                                           FontSize="16"/>
+                                <TextBlock Text="通过 Windows 计划任务实现，在用户登录时以管理员身份自动启动" 
+                                           Opacity="0.7" 
+                                           TextWrapping="Wrap"
+                                           Margin="0 4 0 0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        
+                        <Rectangle Height="1" 
+                                   Fill="{DynamicResource MaterialDesignDivider}" 
+                                   Margin="0 8" 
+                                   Opacity="0.5"/>
+                        
+                        <!-- 以服务方式启动 -->
+                        <RadioButton GroupName="StartupMode"
+                                     IsChecked="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Service}"
+                                     Margin="0 8 0 4">
+                            <StackPanel>
+                                <TextBlock Text="以服务方式启动" 
+                                           FontWeight="SemiBold"
+                                           FontSize="16"/>
+                                <TextBlock Text="安装 Windows 服务，实现跨用户会话启动，支持多用户环境" 
+                                           Opacity="0.7" 
+                                           TextWrapping="Wrap"
+                                           Margin="0 4 0 0"/>
+                                <TextBlock Text="⚠️ 需要管理员权限安装服务" 
+                                           Opacity="0.9" 
+                                           FontWeight="Medium"
+                                           Foreground="{DynamicResource MaterialDesignBody}"
+                                           Margin="0 4 0 0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        
+                        <Rectangle Height="1" 
+                                   Fill="{DynamicResource MaterialDesignDivider}" 
+                                   Margin="0 8" 
+                                   Opacity="0.5"/>
+                        
+                        <!-- 禁用自启动 -->
+                        <RadioButton GroupName="StartupMode"
+                                     IsChecked="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Disabled}"
+                                     Margin="0 4 0 8">
+                            <StackPanel>
+                                <TextBlock Text="禁用自启动" 
+                                           FontWeight="SemiBold"
+                                           FontSize="16"/>
+                                <TextBlock Text="不自动启动 ClassIsland，需要手动启动应用" 
+                                           Opacity="0.7" 
+                                           TextWrapping="Wrap"
+                                           Margin="0 4 0 0"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </Expander>
+            </materialDesign:Card>
+
+            <!-- 计划任务管理（仅当选择AdminTask时显示） -->
+            <materialDesign:Card Margin="0 0 0 6"
+                                 IsEnabled="{Binding ViewModel.IsRunningAsAdmin}"
+                                 Visibility="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=AdminTask}">
+                <Expander Background="Transparent"
+                          IsExpanded="True"
+                          TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                    <Expander.Header>
+                        <ci:SettingsControl IconGlyph="Task"
+                                            Foreground="{DynamicResource MaterialDesignBody}"
+                                            Header="计划任务管理"
+                                            Description="管理 Windows 计划任务"
+                                            HasSwitcher="False"
+                                            Margin="-12 0" />
+                    </Expander.Header>
+                    <StackPanel Margin="36 0 48 12">
+                        <WrapPanel>
+                            <Button Click="ButtonCreateTask_OnClick" 
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    ToolTip="创建或更新计划任务，用于在用户登录时以管理员身份启动 ClassIsland">
+                                <ci:IconText Kind="Add" Text="创建/更新计划任务" />
+                            </Button>
+                            <Button Click="ButtonRemoveTask_OnClick" 
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Margin="4 0 0 0"
+                                    ToolTip="删除已创建的计划任务">
+                                <ci:IconText Kind="Remove" Text="删除计划任务" />
+                            </Button>
+                        </WrapPanel>
+                        <TextBlock Text="当前状态: "
+                                   Margin="0 8 0 0"
+                                   Opacity="0.7"/>
+                        <TextBlock Text="{Binding ViewModel.IsTaskCreated, Converter={StaticResource BooleanToStringConverter}, ConverterParameter='已创建|未创建'}"
+                                   FontWeight="Medium"
+                                   Margin="0 4 0 0"/>
+                    </StackPanel>
+                </Expander>
+            </materialDesign:Card>
+
+            <!-- 服务管理（仅当选择Service时显示） -->
+            <materialDesign:Card Margin="0 0 0 6"
+                                 IsEnabled="{Binding ViewModel.IsRunningAsAdmin}"
+                                 Visibility="{Binding ViewModel.SelectedStartupMode, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Service}">
+                <Expander Background="Transparent"
+                          IsExpanded="True"
+                          TextBlock.Foreground="{DynamicResource MaterialDesignBody}">
+                    <Expander.Header>
+                        <ci:SettingsControl IconGlyph="Server"
+                                            Foreground="{DynamicResource MaterialDesignBody}"
+                                            Header="服务管理"
+                                            Description="管理 Windows 服务"
+                                            HasSwitcher="False"
+                                            Margin="-12 0" />
+                    </Expander.Header>
+                    <StackPanel Margin="36 0 48 12">
+                        <WrapPanel>
+                            <Button Click="ButtonInstallService_OnClick" 
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    ToolTip="安装 Windows 服务，用于跨用户会话启动">
+                                <ci:IconText Kind="Add" Text="安装服务" />
+                            </Button>
+                            <Button Click="ButtonUninstallService_OnClick" 
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Margin="4 0 0 0"
+                                    ToolTip="卸载 Windows 服务">
+                                <ci:IconText Kind="Remove" Text="卸载服务" />
+                            </Button>
+                        </WrapPanel>
+                        <TextBlock Text="当前状态: "
+                                   Margin="0 8 0 0"
+                                   Opacity="0.7"/>
+                        <TextBlock Text="{Binding ViewModel.IsServiceInstalled, Converter={StaticResource BooleanToStringConverter}, ConverterParameter='已安装|未安装'}"
+                                   FontWeight="Medium"
+                                   Margin="0 4 0 0"/>
+                    </StackPanel>
+                </Expander>
+            </materialDesign:Card>
+
+            <!-- 当前状态信息 -->
+            <materialDesign:Card Margin="0 0 0 6"
+                                 Background="{DynamicResource MaterialDesignCardBackground}"
+                                 BorderBrush="{DynamicResource MaterialDesignDivider}">
+                <StackPanel Margin="12">
+                    <TextBlock Text="当前状态信息" 
+                               FontWeight="SemiBold" 
+                               FontSize="16"
+                               Margin="0 0 0 8"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Text="运行权限:" 
+                                   Grid.Row="0" Grid.Column="0"
+                                   Opacity="0.7"
+                                   Margin="0 0 8 4"/>
+                        <TextBlock Text="{Binding ViewModel.IsRunningAsAdmin, Converter={StaticResource BooleanToStringConverter}, ConverterParameter='管理员|普通用户'}"
+                                   Grid.Row="0" Grid.Column="1"
+                                   FontWeight="Medium"
+                                   Margin="0 0 0 4"/>
+                        
+                        <TextBlock Text="当前模式:" 
+                                   Grid.Row="1" Grid.Column="0"
+                                   Opacity="0.7"
+                                   Margin="0 0 8 4"/>
+                        <TextBlock Text="{Binding ViewModel.SelectedStartupMode}"
+                                   Grid.Row="1" Grid.Column="1"
+                                   FontWeight="Medium"
+                                   Margin="0 0 0 4"/>
+                        
+                        <TextBlock Text="应用路径:" 
+                                   Grid.Row="2" Grid.Column="0"
+                                   Opacity="0.7"
+                                   Margin="0 0 8 4"/>
+                        <TextBlock Text="{Binding ViewModel.ClassIslandPath}"
+                                   Grid.Row="2" Grid.Column="1"
+                                   TextWrapping="Wrap"
+                                   Margin="0 0 0 4"/>
+                    </Grid>
+                </StackPanel>
+            </materialDesign:Card>
+        </StackPanel>
+    </ScrollViewer>
 </ci:SettingsPageBase>

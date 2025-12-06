@@ -12,26 +12,26 @@ namespace StartUpAsAdmin
     {
         public const string DefaultServiceName = "CIServerService";
         public const string DefaultDisplayName = "CIServer Service";
-        public const string DefaultDescription = "Æô¶¯ CIServer.exe£¨ÓÉ²å¼þ´´½¨£©";
+        public const string DefaultDescription = "å¯åŠ¨ CIServer.exe(ç”±æ’ä»¶åˆ›å»º)";
 
         public static void InstallService(string serviceName, string displayName, string description, string exePath)
         {
             if (string.IsNullOrWhiteSpace(serviceName)) throw new ArgumentNullException(nameof(serviceName));
             if (string.IsNullOrWhiteSpace(exePath)) throw new ArgumentNullException(nameof(exePath));
-            if (!File.Exists(exePath)) throw new FileNotFoundException("Ö¸¶¨µÄ¿ÉÖ´ÐÐÎÄ¼þ²»´æÔÚ¡£", exePath);
+            if (!File.Exists(exePath)) throw new FileNotFoundException("æŒ‡å®šçš„å¯æ‰§è¡Œæ–‡ä»¶ä¸å­˜åœ¨ã€‚", exePath);
 
             IntPtr scm = Native.OpenSCManager(null, null, Native.SC_MANAGER_CREATE_SERVICE);
             if (scm == IntPtr.Zero) ThrowLastError("OpenSCManager");
 
             try
             {
-                // Èç¹ûÒÑ´æÔÚÔòÉ¾³ýÔÙ´´½¨£¨ÒÔ±£Ö¤Â·¾¶¸üÐÂ£©
+                // å¦‚æžœå·²å­˜åœ¨åˆ™åˆ é™¤å†åˆ›å»ºï¼ˆä»¥ä¿è¯è·¯å¾„æ›´æ–°ï¼‰
                 IntPtr existing = Native.OpenService(scm, serviceName, Native.SERVICE_ALL_ACCESS);
                 if (existing != IntPtr.Zero)
                 {
                     try
                     {
-                        // ³¢ÊÔÍ£Ö¹
+                        // å°è¯•åœæ­¢
                         try { StopServiceInternal(existing); } catch { }
                         if (!Native.DeleteService(existing)) ThrowLastError("DeleteService");
                     }
@@ -61,7 +61,7 @@ namespace StartUpAsAdmin
 
                 try
                 {
-                    // ÉèÖÃÃèÊö
+                    // è®¾ç½®æè¿°
                     if (!string.IsNullOrEmpty(description))
                     {
                         var desc = new Native.SERVICE_DESCRIPTION { lpDescription = description };
@@ -123,7 +123,7 @@ namespace StartUpAsAdmin
             using var sc = new ServiceController(serviceName);
             try
             {
-                var _ = sc.Status; // Èç¹û²»´æÔÚ»áÅ×Òì³£
+                var _ = sc.Status; // å¦‚æžœä¸å­˜åœ¨ä¼šæŠ›å¼‚å¸¸
                 return true;
             }
             catch (InvalidOperationException)
@@ -148,11 +148,11 @@ namespace StartUpAsAdmin
             var status = new Native.SERVICE_STATUS();
             if (!Native.ControlService(serviceHandle, Native.SERVICE_CONTROL_STOP, ref status))
             {
-                // Èç¹ûÎÞ·¨Í£Ö¹¾ÍºöÂÔ
+                // å¦‚æžœæ— æ³•åœæ­¢å°±å¿½ç•¥
             }
             else
             {
-                // µÈ´ýÍ£Ö¹Íê³É£¨ÂÖÑ¯£©
+                // ç­‰å¾…åœæ­¢å®Œæˆï¼ˆè½®è¯¢ï¼‰
                 int retries = 30;
                 while (retries-- > 0)
                 {
@@ -165,7 +165,7 @@ namespace StartUpAsAdmin
 
         private static void ThrowLastError(string apiName)
         {
-            throw new Win32Exception(Marshal.GetLastWin32Error(), $"µ÷ÓÃ {apiName} Ê§°Ü¡£");
+            throw new Win32Exception(Marshal.GetLastWin32Error(), $"è°ƒç”¨ {apiName} å¤±è´¥ã€‚");
         }
 
         private static class Native
