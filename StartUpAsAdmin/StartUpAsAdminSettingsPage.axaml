@@ -1,0 +1,43 @@
+﻿<ci:SettingsPageBase x:Class="StartUpAsAdmin.StartUpAsAdminSettingsPage"
+      xmlns="https://github.com/avaloniaui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:StartUpAsAdmin"
+      xmlns:ci="http://classisland.tech/schemas/xaml/core"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      d:DataContext="{d:DesignInstance local:StartUpAsAdminSettingsPage}">
+
+    <ScrollViewer>
+        <StackPanel Classes="settings-container animated-intro">
+            <controls:InfoBar Severity="Error"
+                              Message="你需要以管理员身份运行 ClassIsland 才能更改此处的设置。"
+                              IsClosable="False"
+                              IsOpen="{Binding !ViewModel.IsRunningAsAdmin}">
+                <controls:InfoBar.ActionButton>
+                    <Button Content="以管理员身份重启"
+                            Click="ButtonRestartAsAdmin_OnClick" />
+                </controls:InfoBar.ActionButton>
+            </controls:InfoBar>
+
+            <!-- 以管理员身份自启动 -->
+            <controls:SettingsExpander IconSource="{ci:FluentIconSource &#xEF5D;}"
+                                       Header="以管理员身份自启动"
+                                       IsExpanded="True"
+                                       IsEnabled="{Binding ViewModel.IsRunningAsAdmin}"
+                                       Description="ClassIsland 将创建一个计划任务以实现以管理员身份自启动，并禁用应用内置的自启动方式。">
+                <controls:SettingsExpanderItem Content="创建/更新计划任务"
+                                               IsClickEnabled="True"
+                                               ActionIconSource="{ci:FluentIconSource &#xE44E;}"
+                                               Click="ButtonCreateTask_OnClick" />
+                <controls:SettingsExpanderItem Content="删除计划任务"
+                                               IsClickEnabled="True"
+                                               ActionIconSource="{ci:FluentIconSource &#xE44E;}"
+                                               Click="ButtonRemoveTask_OnClick" />
+            </controls:SettingsExpander>
+        </StackPanel>
+    </ScrollViewer>
+</ci:SettingsPageBase>

@@ -5,30 +5,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Avalonia.Interactivity;
 using ClassIsland.Core;
+using ClassIsland.Core.Abstractions.Controls;
 using ClassIsland.Core.Attributes;
-using MaterialDesignThemes.Wpf;
+using ClassIsland.Core.Controls;
+using ClassIsland.Core.Helpers.UI;
+using ClassIsland.Platforms.Abstraction;
 using Microsoft.Win32.TaskScheduler;
 using StartUpAsAdmin.ViewModels;
 using YamlDotNet.Core;
-using CommonDialog = ClassIsland.Core.Controls.CommonDialog.CommonDialog;
 
 namespace StartUpAsAdmin;
 
 /// <summary>
 /// StartUpAsAdminSettingsPage.xaml 的交互逻辑
 /// </summary>
-[SettingsPageInfo("classisland.startUpAsAdmin", "管理员自启动", PackIconKind.Administrator, PackIconKind.Administrator)]
-public partial class StartUpAsAdminSettingsPage
+[SettingsPageInfo("classisland.startUpAsAdmin", "管理员自启动", "\uef5d", "\uef5c")]
+public partial class StartUpAsAdminSettingsPage : SettingsPageBase
 {
     private const string TaskName = "ClassIsland.AdminStartup";
 
@@ -64,13 +58,12 @@ public partial class StartUpAsAdminSettingsPage
             task.Settings.ExecutionTimeLimit = TimeSpan.Zero;
             task.Principal.RunLevel = TaskRunLevel.Highest;
             taskService.RootFolder.RegisterTaskDefinition(TaskName, task, TaskCreation.CreateOrUpdate, null, null, TaskLogonType.InteractiveToken);
-            dynamic app = AppBase.Current;
-            app.Settings.IsAutoStartEnabled = false;
-            CommonDialog.ShowInfo("成功创建/更新了计划任务。");
+            PlatformServices.DesktopService.IsAutoStartEnabled = false;
+            this.ShowSuccessToast("成功创建/更新了计划任务。");
         }
         catch (Exception exception)
         {
-            CommonDialog.ShowError($"无法创建计划任务：{exception.Message}");
+            this.ShowErrorToast("无法创建计划任务", exception);
         }
         
     }
@@ -98,7 +91,7 @@ public partial class StartUpAsAdminSettingsPage
         }
         catch (Exception exception)
         {
-            CommonDialog.ShowError($"无法以管理员身份重启：{exception.Message}");
+            this.ShowErrorToast("无法以管理员身份重启", exception);
         }
     }
 
@@ -108,11 +101,11 @@ public partial class StartUpAsAdminSettingsPage
         {
             var taskService = new TaskService();
             taskService.RootFolder.DeleteTask(TaskName);
-            CommonDialog.ShowInfo("成功删除了计划任务。");
+            this.ShowSuccessToast("成功删除了计划任务。");
         }
         catch (Exception exception)
         {
-            CommonDialog.ShowError($"无法删除计划任务：{exception.Message}");
+            this.ShowErrorToast("无法删除计划任务", exception);
         }
     }
 }
