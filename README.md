@@ -2,7 +2,8 @@
 
 本插件可以通过计划任务，让 ClassIsland 在开机时以管理员身份自启动。
 
-![图片](https://github.com/user-attachments/assets/55e09328-5cde-49b9-be42-6e48a895f8eb)
+<img alt="image" src="https://github.com/user-attachments/assets/b6e8e091-1233-42b6-973c-490ba82a6a41" />
+
 
 ## 使用方法
 
