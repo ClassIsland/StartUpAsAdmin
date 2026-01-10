@@ -8,7 +8,7 @@ name: 以管理员身份自启动
 description: 通过计划任务，让 ClassIsland 在开机时以管理员身份自启动。
 entranceAssembly: "StartUpAsAdmin.dll"
 url: https://github.com/ClassIsland/StartUpAsAdmin
-version: 2.0.0.0
+version: 2.0.0.1
 apiVersion: 2.0.0.0
 icon: icon.ico
 author: ClassIsland
