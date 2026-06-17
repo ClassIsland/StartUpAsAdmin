@@ -1,0 +1,32 @@
+name: Build Project
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build CIPX
+        run: dotnet publish -p:CreateCipx=true --configuration Release --no-restore
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: startupasadmin-cipx-artifacts
+          path: |
+            D:\a\StartUpAsAdmin\StartUpAsAdmin\StartUpAsAdmin\cipx\StartUpAsAdmin.cipx
